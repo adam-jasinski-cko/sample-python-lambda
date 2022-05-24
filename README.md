@@ -3,6 +3,14 @@
 Simple POC with a Python AWS Lambda.
 Uses poetry for package management and building; Localstack Docker container for testing and custom scripts for local deployments.
 
+# Pre-requisites
+
+- [Poetry](https://python-poetry.org/)
+- Docker CLI
+- [AWS CLI local](https://github.com/localstack/awscli-local) (optional)
+
+Please run `poetry install` first.
+
 # How the project was initialized 
 1. `poetry init`
 
