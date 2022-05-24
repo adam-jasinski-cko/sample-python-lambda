@@ -1,0 +1,1 @@
+This directory is mounted inside Localstack docker container. It is used by local build scripts to place Lambda artifacts.
