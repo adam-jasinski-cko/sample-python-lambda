@@ -1,7 +1,7 @@
 # sample-python-lambda
 
 Simple POC with a Python AWS Lambda.
-Uses poetry for package management and building; localstack Docker container and custom scripts for local deployments.
+Uses poetry for package management and building; Localstack Docker container for testing and custom scripts for local deployments.
 
 # How the project was initialized 
 1. `poetry init`
@@ -20,17 +20,23 @@ Run custom command: `poetry run <cmd>`
 
 # Packing Lambda
 
-Create lambda zip
+Create lambda zip:
+
 `poetry run pack`
 
-# Deploying
+# Running Localstack
 
-```
-docker-compose up -d
-poetry run localdeploy
-```
+`docker-compose up -d`
 
-# Ad-hoc Invoking
+# Deploying to Localstack
+
+`poetry run localdeploy`
+
+Note: The script unpacks Lambda zip into a directory mounted inside Localstack. See also Localstack [Lambda configuration](https://docs.localstack.cloud/localstack/configuration/) and [Hot swapping](https://docs.localstack.cloud/tools/lambda-tools/hot-swapping/).
+
+# Ad-hoc Invoking on Localstack
+
+Requires [awslocal](https://github.com/localstack/awscli-local)
 
 `awslocal lambda invoke --function-name sample-python-lambda --payload '{}' result.json`
 
@@ -40,5 +46,10 @@ poetry run localdeploy
 
 # Checking logs
 
-`awslocal logs tail /aws/lambda/sample-python-lambda --follow` 
-(or without `--follow`)
+`awslocal logs tail /aws/lambda/sample-python-lambda`  (optionally with `--follow`)
+
+# Caveats
+
+Logging from Lambda (e.g. with `logger.info`) doesn't seem to propagate to Localstack Cloudwatch. However, `print` output is captured in Localstack Cloudwatch.
+
+To verify: if standard logging is available in actual AWS Cloudwatch.

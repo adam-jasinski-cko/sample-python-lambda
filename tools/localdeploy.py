@@ -1,9 +1,7 @@
 import os
 import logging
 import json
-import shutil
 import boto3
-import botocore.exceptions
 from . import utils, packer
 
 AWS_REGION = 'us-east-1'
@@ -11,7 +9,8 @@ AWS_PROFILE = 'localstack'
 ENDPOINT_URL = 'http://localhost:4566' #os.environ.get('LOCALSTACK_ENDPOINT_URL')
 LAMBDA_ZIP = os.path.join(utils.REPO_ROOT, 'artifacts/lambda.zip')
 LOCALSTACK_MOUNT_TMP = os.path.join(utils.REPO_ROOT, 'localstack_tmp')
-# boto3.setup_default_session(profile_name=AWS_PROFILE)
+
+# Use dummy creds for Localstack
 localstack_session = boto3.session.Session(aws_access_key_id='XXX', aws_secret_access_key='XXX', aws_session_token='XXX')
 
 # logger config
@@ -69,23 +68,12 @@ def create_lambda(function_name):
     """
     try:
         lambda_client = get_boto3_client('lambda')
-        #_ = create_lambda_zip(function_name)
 
-        # create zip file for lambda function.
-        # with open(LAMBDA_ZIP, 'rb') as f:
-        #     zipped_code = f.read()
         info = None
         try:
             info = lambda_client.get_function(FunctionName=function_name)
         except lambda_client.exceptions.ResourceNotFoundException as err:
              print('Function does not exist yet; continuing')
-        # except Exception as err:
-        #     print('Caught error!')
-        #     print(type(err))
-        #     if 'ResourceNotFoundException' in type(err).__name__:
-        #         pass
-        #     else:
-        #         raise err
 
         if info is not None and 'Configuration' in info:
             # Update lambda
@@ -109,8 +97,6 @@ def create_lambda(function_name):
                 PackageType='Zip'
                 #Code=dict(ZipFile=zipped_code)
             )
-            # except ResourceConflictException:
-            #     logger('Function already exists. Ignoring')
     except Exception as err:
         logger.exception('Error while creating function.')
         raise err
@@ -126,7 +112,7 @@ def invoke_lambda(function_name):
 
     response = lambda_client.invoke(
         FunctionName = function_name, 
-        InvocationType = 'Event',
+        InvocationType = 'RequestResponse',
         LogType = 'Tail',
         Payload = '{}'
     )

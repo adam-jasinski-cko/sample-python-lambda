@@ -21,7 +21,8 @@ def lambda_handler(event, context):
         },
         "body": json.dumps({
             "Status": "Healthy",
-            "Region ": json_region,
-            "Home": home_dir
+            "Region": json_region,
+            "Home": home_dir,
+            "Greeting": "Hello, world!"
         })
     }
