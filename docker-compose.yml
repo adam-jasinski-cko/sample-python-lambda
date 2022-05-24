@@ -1,0 +1,43 @@
+version: "3.5"
+
+services:
+  localstack:
+      image: localstack/localstack:0.14.2
+      container_name: sample-python-lambda.localstack
+      ports:
+        - "4566:4566"
+        - "4586:4586"
+        - "8080:8080"
+      environment:
+        - SERVICES=s3,lambda,cloudwatch
+        - DEBUG=true
+        - HOSTNAME_EXTERNAL=localstack
+        - DEFAULT_REGION=us-east-1
+        - LAMBDA_REMOTE_DOCKER=false
+        - HOST_TMP_FOLDER=localstack_tmp
+        - LAMBDA_EXECUTOR=local
+      volumes:
+        # Mount unpacked lambda artifacts inside localstack.
+        # Theoretically allows hot plugging (see https://docs.localstack.cloud/tools/lambda-tools/hot-swapping/)
+        #- ${HOST_TMP_FOLDER}:/tmp/localstack
+        - ./localstack_tmp:/tmp/localstack
+
+  # awscli:
+  #   image: garland/aws-cli-docker:1.16.140
+  #   container_name: awscli
+  #   depends_on:
+  #     - localstack
+  #   environment:
+  #   - AWS_DEFAULT_REGION=us-east-1
+  #   - AWS_ACCESS_KEY_ID=XX
+  #   - AWS_SECRET_ACCESS_KEY=XX
+  #   volumes:
+  #     - ./scripts/localstack:/scripts/localstack
+  #   command:
+  #   - /bin/sh
+  #   - -c
+  #   - |
+  #       # Wait for services to be fully operational
+  #       cat /scripts/localstack/wait_for.sh | dos2unix | sh -s localstack:4566 --timeout=60 -- echo 'localstack services are up and running!'
+  #       cat /scripts/localstack/init.sh | dos2unix | sh -
+  #       echo "All setup done"
